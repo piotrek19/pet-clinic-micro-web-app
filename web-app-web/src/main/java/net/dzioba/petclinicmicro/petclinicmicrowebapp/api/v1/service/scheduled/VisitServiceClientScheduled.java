@@ -3,7 +3,8 @@ package net.dzioba.petclinicmicro.petclinicmicrowebapp.api.v1.service.scheduled;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.dzioba.petclinicmicro.common.model.*;
-import net.dzioba.petclinicmicro.petclinicmicrowebapp.api.v1.service.VisitServiceClientSimulator;
+import net.dzioba.petclinicmicro.petclinicmicrowebapp.api.v1.service.VisitServiceClient;
+import net.dzioba.petclinicmicro.petclinicmicrowebapp.domain.RoomReservationStart;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -17,23 +18,23 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Random;
 
 @Slf4j
 @Setter
 @ConfigurationProperties(prefix = "net.dzioba.petclinicmicro")
 @Service
-public class VisitServiceClientSimulatorScheduled implements VisitServiceClientSimulator {
+public class VisitServiceClientScheduled implements VisitServiceClient {
 
-    private final Integer maxDayOffset = 11;
+    private static final Integer DAYS_OFFSET_MAX = 11;
+    private static final RoomReservationStart[] ROOM_RESERVATION_STARTS = RoomReservationStart.values();
 
     private String clinicManagerAppHost;
     private String clinicManagerApiV1Visits;
 
     private final RestTemplate restTemplate;
 
-    public VisitServiceClientSimulatorScheduled(RestTemplateBuilder restTemplateBuilder) {
+    public VisitServiceClientScheduled(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
     }
 
@@ -43,7 +44,7 @@ public class VisitServiceClientSimulatorScheduled implements VisitServiceClientS
     public void findPossibleVisitsForDate() {
         log.debug("Scheduled method findPossibleVisitsForDate started");
 
-        String visitDate = LocalDate.now().plusDays(new Random().nextInt(maxDayOffset)).toString();
+        String visitDate = LocalDate.now().plusDays(new Random().nextInt(DAYS_OFFSET_MAX)).toString();
         String url = UriComponentsBuilder.fromUriString(clinicManagerAppHost + clinicManagerApiV1Visits)
                 .queryParam("visitDate", visitDate).toUriString();
 
@@ -61,17 +62,17 @@ public class VisitServiceClientSimulatorScheduled implements VisitServiceClientS
     public void scheduleThisVisit() {
         log.debug("Scheduled method scheduleThisVisit started");
 
-        LocalDate visitDate = LocalDate.now().plusDays(new Random().nextInt(maxDayOffset));
-        LocalTime visitTime = LocalTime.of(9 + new Random().nextInt(4), new Random().nextInt(2) == 0 ? 0 : 30);
-
+        LocalDate visitDateRoullete = LocalDate.now().plusDays(new Random().nextInt(DAYS_OFFSET_MAX));
+        RoomReservationStart roomReservationStartRoulette = ROOM_RESERVATION_STARTS[new Random().nextInt(ROOM_RESERVATION_STARTS.length)];
         Long petRoulette = new Random().nextInt(2) == 0 ? 1L : 2L;
+        Long vetRoulette =  new Random().nextInt(2) == 0 ? 1L : 2L;
 
         PetShorterDTO pet = PetShorterDTO.builder().id(petRoulette).build();
         OwnerShorterDTO owner = OwnerShorterDTO.builder().id(petRoulette).build();
-        VetShortDTO vet = VetShortDTO.builder().id(petRoulette).build();
-        RoomReservationShortDTO roomReservation = RoomReservationShortDTO.builder().room(RoomShortDTO.builder().id(petRoulette).build()).build();
+        VetShortDTO vet = VetShortDTO.builder().id(vetRoulette).build();
+        RoomReservationShortDTO roomReservation = RoomReservationShortDTO.builder().room(RoomShortDTO.builder().id(vetRoulette).build()).build();
 
-        VisitDTO visitDTO = VisitDTO.builder().dateTime(LocalDateTime.of(visitDate, visitTime))
+        VisitDTO visitDTO = VisitDTO.builder().dateTime(LocalDateTime.of(visitDateRoullete, roomReservationStartRoulette.getTime()))
                 .description("Client Simulator here").owner(owner).pet(pet)
                 .roomReservation(roomReservation).vet(vet).build();
 
