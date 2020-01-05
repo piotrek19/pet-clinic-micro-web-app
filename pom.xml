@@ -15,7 +15,7 @@
 
     <groupId>net.dzioba.petclinicmicro</groupId>
     <artifactId>pet-clinic-micro-web-app</artifactId>
-    <version>0.1.2-SNAPSHOT</version>
+    <version>0.1.2</version>
     <name>pet-clinic-micro-web-app</name>
     <description>WebApp for customers of microservice-based PetClinicApp</description>
     <inceptionYear>2019</inceptionYear>
@@ -34,7 +34,7 @@
 
     <scm>
         <developerConnection>scm:git:git@github.com:piotrek19/pet-clinic-micro-web-app.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>pet-clinic-micro-web-app-0.1.2</tag>
     </scm>
 
     <developers>
